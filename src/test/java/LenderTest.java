@@ -1,4 +1,6 @@
 import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import org.assertj.core.data.Percentage;
 import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -70,6 +72,30 @@ final class LenderTest {
         final Exception actual = assertThrows(ArithmeticException.class,
                 () -> lender.addFunds(1L));
         assertThat(actual.getMessage()).isEqualTo(expected);
+    }
+
+    @Test
+    void denyApplicantWhenInsufficientFundsToCoverLoan() {
+        final Lender lender = new Lender();
+        final LoanApplicant applicant = new LoanApplicant(
+                200000,
+                1000000,
+                400000,
+                100000,
+                650
+        );
+        Enum expected = ApplicationStatus.INSUFFICIENT_FUNDS;
+        Enum actual = lender.getApproval(applicant);
+        assertThat(actual).isEqualTo(expected);
+    }
+
+    @Test
+    void canCalculateCorrectMonthlyPaymentForApplicant() {
+        final Lender lender = new Lender();
+        float expected = 1193.54f;
+        float actual = lender.calculatePayment(250000L, .04f, 360);
+        assertThat(actual).isCloseTo(expected, Percentage.withPercentage(0.01f));
+
     }
 
 }
